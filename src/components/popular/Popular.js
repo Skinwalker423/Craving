@@ -1,19 +1,28 @@
 import { useEffect, useState } from "react";
-
-import { Wrapper, Card } from "./popular-styles";
+import { Splide, SplideSlide } from "@splidejs/react-splide";
+import { Wrapper, Card, Gradient } from "./popular-styles";
+import '@splidejs/react-splide/css';
 
 const Popular = () => {
+
+    localStorage.setItem()
 
     const [popularRecipes, setPopularRecipes] = useState([])
 
     useEffect(() => {
 
         const fetchPopularRecipes = async() => {
-        const res = await fetch(`https://api.spoonacular.com/recipes/random?apiKey=${process.env.REACT_APP_SPOONTACULAR_KEY}&number=9`);
-        const data = await res.json();
-        setPopularRecipes(data.recipes);
+            const check = localStorage.getItem("popularRecipes");
+            if(check){
+                setPopularRecipes(JSON.parse(check));
+            } else {
+                const res = await fetch(`https://api.spoonacular.com/recipes/random?apiKey=${process.env.REACT_APP_SPOONTACULAR_KEY}&number=9`);
+                const data = await res.json();
+                setPopularRecipes(data.recipes);
+                localStorage.setItem("popularRecipes", JSON.stringify(data.recipes));
+            }
     }
-        fetchPopularRecipes();
+            fetchPopularRecipes();
     }, [])
 
     if(!popularRecipes.length){
@@ -23,19 +32,23 @@ const Popular = () => {
 
     const popRecipes = popularRecipes.map((recipe) => {
             return (
-                <Card key={recipe.id}>
-                    <h3>{recipe.title}</h3>
-                    <img src={recipe.image} alt={recipe.title} />
-                </Card>
+                <SplideSlide key={recipe.id}>
+                    <Card key={recipe.id}>
+                        <p>{recipe.title}</p>
+                        <img src={recipe.image} alt={recipe.title} />
+                        <Gradient />
+                    </Card>
+                </SplideSlide>
             )
         })
 
 
 
     return (
-        <Wrapper className="popular">
-            <h1>Popular</h1>
-            {popRecipes}
+        <Wrapper className="custom-wrapper">
+            <Splide aria-label="My Favorite Images">
+                {popRecipes}
+            </Splide>
         </Wrapper>
     )
 }
